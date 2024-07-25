@@ -1,0 +1,3184 @@
+//MASTER CODE FOR ARDUINO MEGA
+#include <math.h>
+#include <Wire.h>
+  
+//INPUT A
+const float X1 = 9.0;
+const float Y1 = 2.0;
+int Command;
+
+//INPUT B
+const float X2 = 1.0;
+const float Y2 = 2.0;
+
+int NanoAddresses[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
+
+
+//waste cordinates 
+int x1, y1, x2, y2;
+String type1, type2;
+
+volatile String prevData = "";
+
+void setup() {
+  Wire.setClock(80000);
+  Wire.begin(0x0A);
+  Serial.begin(9600);
+}
+
+void loop() {
+if (Serial.available()) {
+  // Read thing and process
+  String data = Serial.readStringUntil('\n');
+  if (prevData != data){
+    prevData = data;
+  // Dividing received thing based on commas
+   int firstCI = data.indexOf(',');
+  int secondCI = data.indexOf(',', firstCI + 1);
+  int thirdCI = data.indexOf(',', secondCI + 1);
+  int fourthCI = data.indexOf(',', thirdCI + 1);
+  int fifthCI = data.indexOf(',', fourthCI + 1);
+  int sixthCI = data.indexOf(',', fifthCI + 1);
+    
+  if (firstCI > 0 && secondCI > 0 && thirdCI > 0 && fourthCI > 0 && fifthCI > 0 && sixthCI > 0) {
+    // Know the thing and sort it up
+     Serial.println("Data Received. 2 objects found.");
+     x1 = data.substring(0, firstCI).toFloat();
+     y1 = data.substring(firstCI + 1, secondCI).toFloat();
+     x2 = data.substring(secondCI + 1, thirdCI).toFloat();
+     y2 = data.substring(thirdCI + 1, fourthCI).toFloat();
+     type1 = data.substring(fourthCI + 1, fifthCI);
+     type2 = data.substring(fifthCI + 1, sixthCI);
+     
+     float distOb1A = sqrt(pow(X1 - x1, 2) + pow(Y1 - y1, 2));
+     float distOb1B = sqrt(pow(X2 - x1, 2) + pow(Y2 - y1, 2));
+     float distOb2A = sqrt(pow(X1 - x2, 2) + pow(Y1 - y2, 2));
+     float distOb2B = sqrt(pow(X2 - x2, 2) + pow(Y2 - y2, 2));
+
+
+    if (distOb1A < distOb1B && distOb2A < distOb2B) {
+      Serial.println("Objects are closer to entry A");
+    if (distOb1A < distOb2A){
+      Serial.println("Object 1 is closer to entry A than object 2");
+     
+      if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 1;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 2;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 3;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 4;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 5;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 6;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 31;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 32;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 33;
+      }
+      else {
+        Serial.println("wtf.");
+      }}
+    else { Serial.println("Object 2 is closer to entry A than object 1");
+    if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 102;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 101;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 104;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 103;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 106;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 105;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 31;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 32;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 33;
+      } }
+    }
+      else  if (distOb1A > distOb1B && distOb2A > distOb2B) {
+      Serial.println("Objects are closer to entry B");
+    if (distOb1B < distOb2B){
+      Serial.println("Object 1 is closer to entry B than object 2");
+     
+      if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 7;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 8;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 9;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 10;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 11;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 12;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 34;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 35;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 36;
+      }
+      else {
+        Serial.println("wtf.");
+      }}
+    else { Serial.println("Object 2 is closer to entry B than object 1");
+    if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 108;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 107;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 110;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 109;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 112;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 111;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 34;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 35;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 36;
+      } }
+    }
+    else if (distOb1A < distOb1B && distOb2A > distOb2B){
+      Serial.println("Object 1 is on A, object 2 is on B");
+      if (distOb1A < distOb2B){
+        Serial.println("Object 1 should take long route");
+        if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 13;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 14;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 15;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 16;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 17;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 18;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 37;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 38;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 39;
+      }
+      }
+
+      else { Serial.println("Object 2 should take long route");
+        if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 19;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 20;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 21;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 22;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 23;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 24;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 37;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 38;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 39;
+      }
+      }
+    }
+    else if (distOb1A > distOb1B && distOb2A < distOb2B){
+      Serial.println("Object 1 is on B, object 2 is on A");
+      if (distOb1B < distOb2A){
+        Serial.println("Object 1 should take long route");
+        if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 119;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 120;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 121;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 122;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 123;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 124;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 37;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 38;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 39;
+      }
+      }
+
+      else { Serial.println("Object 2 should take long route");
+        if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 113;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 114;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 115;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 116;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 117;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 118;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 37;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 38;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 39;
+      }
+      }
+    }
+    else if (distOb1A < distOb1B && distOb2A > distOb2B){
+      Serial.println("Object 1 is on A, object 2 is on B");
+      if (distOb1A == distOb2B){
+        Serial.println("One of the objects should take long route");
+        if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 13;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 14;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 15;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 16;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 17;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 18;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 37;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 38;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 39;
+      }
+      }
+    }
+    else if (distOb1A > distOb1B && distOb2A < distOb2B){
+      Serial.println("Object 1 is on B, object 2 is on A");
+      if (distOb1B == distOb2A){
+        Serial.println("One of the objects should take long route");
+        if (type1 == "plastic" && type2 == "glass") {
+        Serial.println("1st thing plastic, 2nd thing glass");
+        Command = 119;
+      }
+      else if (type1 == "glass" && type2 == "plastic") {
+        Serial.println("1st thing glass, 2nd thing plastic");
+        Command = 120;
+      }
+      else if (type1 == "plastic" && type2 == "aluminum") {
+        Serial.println("1st thing plastic, 2nd thing aluminum");
+        Command = 121;
+      }
+      else if (type1 == "aluminum" && type2 == "plastic") {
+        Serial.println("1st thing aluminum, 2nd thing plastic");
+        Command = 122;
+      } 
+      else if (type1 == "glass" && type2 == "aluminum") {
+        Serial.println("1st thing glass, 2nd thing aluminum");
+        Command = 123;
+      } 
+      else if (type1 == "aluminum" && type2 == "glass") {
+        Serial.println("1st thing aluminum, 2nd thing glass");
+        Command = 124;
+      }
+      else if (type1 == "glass" && type2 == type1) {
+        Serial.println("Both are glass");
+        Command = 37;
+      }
+      else if (type1 == "plastic" && type2 == type1) {
+        Serial.println("Both are plastic");
+        Command = 38;
+      }
+      else if (type1 == "aluminium" && type2 == type1) {
+        Serial.println("Both are aluminium");
+        Command = 39;
+      }
+      }
+    }}
+    else if (firstCI > 0 && secondCI > 0 && thirdCI > 0){
+      Serial.println("Data Received. 1 object found.");
+      x1 = data.substring(0, firstCI).toFloat();
+      y1 = data.substring(firstCI + 1, secondCI).toFloat();
+      type1 = data.substring(secondCI + 1, thirdCI);
+      float distOb1A = sqrt(pow(X1 - x1, 2) + pow(Y1 - y1, 2));
+      float distOb1B = sqrt(pow(X2 - x1, 2) + pow(Y2 - y1, 2));
+      if (distOb1A < distOb1B) {
+        Serial.println("Object is closer to entry A");
+        if (type1 == "plastic"){
+          Serial.println("Object is of plastic material");
+          Command = 25;}
+          else if (type1 == "glass"){
+          Serial.println("Object is of glass material");
+          Command = 26;}
+          else if (type1 == "aluminium"){
+          Serial.println("Object is of aluminium material");
+          Command = 27;}
+        }
+        else {
+          Serial.println("Object is closer to entry B");
+        if (type1 == "plastic"){
+          Serial.println("Object is of plastic material");
+          Command = 28;}
+          else if (type1 == "glass"){
+          Serial.println("Object is of glass material");
+          Command = 29;}
+          else if (type1 == "aluminium"){
+          Serial.println("Object is of aluminium material");
+          Command = 30;}
+        }}
+  for (int i = 1; i<=7; i++){
+    Wire.beginTransmission(NanoAddresses[i]);
+    Wire.write(Command);
+    Wire.endTransmission();
+    Wire.beginTransmission(NanoAddresses[i]);
+    Wire.write(x1);
+    Wire.endTransmission();
+    Wire.beginTransmission(NanoAddresses[i]);
+    Wire.write(y1);
+    Wire.endTransmission();
+    Wire.beginTransmission(NanoAddresses[i]);
+    Wire.write(x2);
+    Wire.endTransmission();
+    Wire.beginTransmission(NanoAddresses[i]);
+    Wire.write(y2);
+    Wire.endTransmission();}
+        }
+        else if (prevData == data){
+        delay (50);}
+        }
+        }
+
+        //SLAVE CODE 1
+        #include <Stepper.h>
+#include <Wire.h>
+#include <math.h>
+
+const int spr = 2048;
+Stepper S1(spr, 2, 3, 4, 5);
+Stepper S2(spr, 6, 7, 8, 9);
+Stepper S3(spr, 10 ,11, 12, 13);
+int Comm, x1, y1, x2, y2;
+
+void setup() {
+  S1.setSpeed(15);
+  S2.setSpeed(15);
+  S3.setSpeed(15);
+  Wire.begin(0x01);
+  Wire.onReceive(Event);
+}
+
+void Event (int bytes){
+  Comm = Wire.read();
+  x1 = Wire.read();
+  y1 = Wire.read();
+  x2 = Wire.read();
+  y2 = Wire.read();
+}
+
+void loop() {
+  switch (Comm){
+    case 1:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 101:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 2:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 102:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 3:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 103:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 4:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 104:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 5:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 105:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 6:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 106:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 7:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 107:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 8:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 108:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 9:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 109:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 10:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 110:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 11:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 111:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 12:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 112:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 13:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 113:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 14:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 114:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 15:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 115:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 16:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 116:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 17:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 117:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 18:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 118:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 19:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 119:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 20:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 120:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 21:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 121:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 22:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 122:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 23:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 123:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 24:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 124:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 25:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 26:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 27:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 28:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 29:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 30:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 31:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 32:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 33:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 34:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 35:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 36:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 37:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 38:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(spr);
+    break;}
+    case 39:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    default:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    }
+    delay(50);
+}
+
+//SLAVE CODE 2
+#include <Stepper.h>
+#include <Wire.h>
+#include <math.h>
+
+const int spr = 2048;
+Stepper S1(spr, 2, 3, 4, 5);
+Stepper S2(spr, 6, 7, 8, 9);
+Stepper S3(spr, 10 ,11, 12, 13);
+int Comm, x1, y1, x2, y2;
+
+void setup() {
+  S1.setSpeed(15);
+  S2.setSpeed(15);
+  S3.setSpeed(15);
+  Wire.begin(0x02);
+  Wire.onReceive(Event);
+}
+
+void Event (int bytes){
+  Comm = Wire.read();
+  x1 = Wire.read();
+  y1 = Wire.read();
+  x2 = Wire.read();
+  y2 = Wire.read();
+}
+
+void loop() {
+  switch (Comm){
+    case 1:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 310 && y1 >= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 101:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 310 && y2 >= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 2:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 >= 250 && y1 <= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 102:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 250 && y2 >= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 3:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 310 && y1 >= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 103:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 310 && y2 >= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 4:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 250 && y1 >= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 104:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 310 && y2 >= -280)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 5:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 105:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 6:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 106:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 7:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 107:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 8:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 108:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 9:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 109:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 10:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 110:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 11:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 111:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 12:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 112:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 13:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 113:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 250 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 14:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 250 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 114:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 15:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 115:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 250 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 16:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 250 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 116:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 17:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 117:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 18:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 118:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 19:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 119:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 250 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 20:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 250 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 120:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;
+    case 21:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 121:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 250 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 22:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 250 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 122:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 23:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 123:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 24:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 124:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 25:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 26:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 27:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 28:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 29:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 30:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 31:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 32:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 33:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 34:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 35:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    if (x1 <= 250 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 36:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 37:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 38:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 39:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    default:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    }
+  }
+  delay(50);
+    }}}
+
+    //SLAVE CODE 3
+    #include <Stepper.h>
+#include <Wire.h>
+#include <math.h>
+
+const int spr = 2048;
+Stepper S1(spr, 2, 3, 4, 5);
+Stepper S2(spr, 6, 7, 8, 9);
+Stepper S3(spr, 10 ,11, 12, 13);
+int Comm, x1, y1, x2, y2;
+
+void setup() {
+  S1.setSpeed(15);
+  S2.setSpeed(15);
+  S3.setSpeed(15);
+  Wire.begin(0x03);
+  Wire.onReceive(Event);
+}
+
+void Event (int bytes){
+  Comm = Wire.read();
+  x1 = Wire.read();
+  y1 = Wire.read();
+  x2 = Wire.read();
+  y2 = Wire.read();
+}
+
+void loop() {
+  switch (Comm){
+    case 1:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 101:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 2:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 102:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 3:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 103:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 4:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 104:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 5:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 105:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 6:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 106:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 7:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 150 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 107:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 150 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 8:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 75 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 108:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 75 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    } break;}
+    case 9:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 109:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 10:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 110:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 11:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 75 && y1 >= -260){
+      S1.step(-spr);
+      S2.step(spr);
+      S3.step(spr);}
+    break;}
+    case 111:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 75 && y2 >= -260){
+      S1.step(-spr);
+      S2.step(spr);
+      S3.step(spr);}
+    break;}
+    case 12:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 150 && y1 >= -260){
+      S1.step(-spr);
+      S2.step(spr);
+      S3.step(-spr);
+    }
+    case 112:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 150 && y2 >= -260){
+      S1.step(-spr);
+      S2.step(spr);
+      S3.step(-spr);
+    }
+    break;}
+    case 13:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 113:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 150 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 14:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 150 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 114:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 15:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 115:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 16:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 116:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 17:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 150 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 117:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 18:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 118:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 150 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 19:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 119:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 150 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 20:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 150 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 120:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 21:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 121:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 22:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 122:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 23:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 150 && y1 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 123:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 24:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 124:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 150 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 25:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 26:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 27:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 28:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 29:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 30:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 31:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 32:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 33:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 34:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 35:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 36:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 37:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 38:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 39:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    default:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    }
+  }
+  delay(50);
+  }
+
+  //SLAVE CODE 4
+  #include <Stepper.h>
+#include <Wire.h>
+#include <math.h>
+
+const int spr = 2048;
+Stepper S1(spr, 2, 3, 4, 5);
+Stepper S2(spr, 6, 7, 8, 9);
+Stepper S3(spr, 10 ,11, 12, 13);
+int Comm, x1, y1, x2, y2;
+
+void setup() {
+  S1.setSpeed(15);
+  S2.setSpeed(15);
+  S3.setSpeed(15);
+  Wire.begin(0x04);
+  Wire.onReceive(Event);
+}
+
+void Event (int bytes){
+  Comm = Wire.read();
+  x1 = Wire.read();
+  y1 = Wire.read();
+  x2 = Wire.read();
+  y2 = Wire.read();
+}
+
+void loop() {
+  switch (Comm){
+    case 1:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 101:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 2:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 102:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 3:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 103:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 4:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 104:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 5:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 200 && y1 <= -225){
+      S1.step(-spr);
+    }
+    break;}
+    case 105:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 200 && y2 <= -225){
+      S1.step(-spr);
+    }
+    break;}
+    case 6:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x1 <= 200 && y1 >= -280){
+      S1.step(spr);
+    }
+    break;}
+    case 106:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    if (x2 <= 200 && y2 >= -280){
+      S1.step(spr);
+    break;}
+    case 7:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 107:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x2 <= 150 && y2 >= -260)
+    {
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    } break;}
+    case 8:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 108:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 9:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(spr);
+    if (x1 <= 200 && y1 >= -280){
+      S2.step(spr);
+    } break;}
+    case 109:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(spr);
+    if (x1 <= 200 && y1 >= -280){
+      S2.step(spr);
+    } break;}
+    case 10:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 200 && y1 <= -225){
+      S2.step(-spr);
+    } break;}
+    case 110:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 200 && y1 <= -225){
+      S2.step(-spr);
+    } break;}
+    case 11:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 111:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 12:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    if (x1 <= 150 && y1 >= -260){
+      S1.step(-spr);
+      S2.step(spr);
+      S3.step(-spr);
+    }
+    case 112:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(spr);
+    break;}
+    case 13:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 113:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(-spr);
+    break;}
+    case 14:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(-spr);
+    break;}
+    case 114:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 15:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 115:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(-spr);
+    break;}
+    case 16:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(-spr);
+    break;}
+    case 116:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 17:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 117:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 18:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(-spr);
+    break;}
+    case 118:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 19:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 119:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 20:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 120:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 21:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 121:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(-spr);
+    break;}
+    case 22:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(-spr);
+    break;}
+    case 122:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 23:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 123:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(-spr);
+    break;}
+    case 24:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 124:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 25:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 26:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 27:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 28:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 29:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 30:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 31:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 32:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 33:{
+    S1.step(-spr);
+    S2.step(0);
+    S3.step(-spr);
+    break;}
+    case 34:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 35:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 36:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    case 37:{
+    S1.step(spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 38:{
+    S1.step(-spr);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 39:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(spr);
+    break;}
+    default:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    }
+  }
+  delay(50);
+  }}
+
+  //SLAVE CODE 5
+  #include <Stepper.h>
+#include <Wire.h>
+#include <math.h>
+
+const int spr = 2048;
+Stepper S1(spr, 2, 3, 4, 5);
+Stepper S2(spr, 6, 7, 8, 9);
+Stepper S3(spr, 10 ,11, 12, 13);
+int Comm, x1, y1, x2, y2;
+
+void setup() {
+  S1.setSpeed(15);
+  S2.setSpeed(15);
+  S3.setSpeed(15);
+  Wire.begin(0x05);
+  Wire.onReceive(Event);
+}
+
+void Event (int bytes){
+  Comm = Wire.read();
+  x1 = Wire.read();
+  y1 = Wire.read();
+  x2 = Wire.read();
+  y2 = Wire.read();
+}
+
+void loop() {
+  switch (Comm){
+    case 1:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 101:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 2:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 102:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 3:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 103:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 4:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 104:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 5:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 105:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 6:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 106:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 7:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 107:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 8:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 108:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 9:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 109:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 10:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 110:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 11:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 111:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 12:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 112:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 13:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 113:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 14:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 114:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 15:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 115:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 16:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 116:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 17:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 117:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 18:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 118:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 19:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 119:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 20:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 120:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 21:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 121:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 22:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 122:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 23:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 123:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 24:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 124:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 25:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 26:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 27:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 28:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 29:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 30:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 31:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 32:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 33:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 34:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 35:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 36:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 37:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 38:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 39:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    default:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    }
+    delay(50);
+}
+
+//SLAVE CODE 6
+#include <Stepper.h>
+#include <Wire.h>
+#include <math.h>
+
+const int spr = 2048;
+Stepper S1(spr, 2, 3, 4, 5);
+Stepper S2(spr, 6, 7, 8, 9);
+Stepper S3(spr, 10 ,11, 12, 13);
+int Comm, x1, y1, x2, y2;
+
+void setup() {
+  S1.setSpeed(15);
+  S2.setSpeed(15);
+  S3.setSpeed(15);
+  Wire.begin(0x06);
+  Wire.onReceive(Event);
+}
+
+void Event (int bytes){
+  Comm = Wire.read();
+  x1 = Wire.read();
+  y1 = Wire.read();
+  x2 = Wire.read();
+  y2 = Wire.read();
+}
+
+void loop() {
+  switch (Comm){
+    case 1:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 101:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 2:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 102:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 3:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 103:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 4:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 104:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 5:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 105:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 6:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 106:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 7:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 107:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 8:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 108:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 9:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 109:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 10:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 110:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 11:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 111:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 12:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 112:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 13:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 113:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 14:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 114:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 15:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 115:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 16:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 116:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 17:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 117:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 18:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 118:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 19:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 119:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 20:{
+    S1.step(0);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 120:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 21:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 121:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 22:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 122:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 23:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 123:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 24:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 124:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 25:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 26:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 27:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 28:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 29:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 30:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 31:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 32:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 33:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 34:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 35:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 36:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    case 37:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 38:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 39:{
+    S1.step(0);
+    S2.step(-spr);
+    S3.step(0);
+    break;}
+    default:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    }
+    delay(50);
+}
+
+//SLAVE CODE 7
+#include <Stepper.h>
+#include <Wire.h>
+#include <math.h>
+
+const int spr = 2048;
+Stepper S1(spr, 2, 3, 4, 5);
+Stepper S2(spr, 6, 7, 8, 9);
+Stepper S3(spr, 10 ,11, 12, 13);
+int Comm, x1, y1, x2, y2;
+
+void setup() {
+  S1.setSpeed(15);
+  S2.setSpeed(15);
+  S3.setSpeed(15);
+  Wire.begin(0x07);
+  Wire.onReceive(Event);
+}
+
+void Event (int bytes){
+  Comm = Wire.read();
+  x1 = Wire.read();
+  y1 = Wire.read();
+  x2 = Wire.read();
+  y2 = Wire.read();
+}
+
+void loop() {
+  switch (Comm){
+    case 1:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 101:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 2:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 102:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 3:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 103:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 4:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 104:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 5:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 105:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 6:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 106:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 7:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 107:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 8:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 108:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 9:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 109:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 10:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 110:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 11:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 111:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 12:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 112:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 13:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 113:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 14:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 114:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 15:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 115:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 16:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 116:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 17:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 117:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 18:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 118:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 19:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 119:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 20:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 120:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 21:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 121:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 22:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 122:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 23:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 123:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 24:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 124:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 25:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 26:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 27:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 28:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 29:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 30:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 31:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 32:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 33:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 34:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 35:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 36:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    case 37:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 38:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    case 39:{
+    S1.step(-spr);
+    S2.step(spr);
+    S3.step(0);
+    break;}
+    default:{
+    S1.step(0);
+    S2.step(0);
+    S3.step(0);
+    break;}
+    }
+    delay(50);
+}
